@@ -1,4 +1,0 @@
-3
-SP01 Laptop 15000 1
-SP02 Mouse 200 2
-SP03 Keyboard 500 1
