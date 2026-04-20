@@ -1,126 +1,136 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "ProductManager.h"
-#include "Customer.h"
-#include "ShoppingCart.h"
-#include "Order.h"
+#include <cstdlib>
+#include <ctime>
+#include "../include/ProductManager.h"
+#include "../include/Customer.h"
+#include "../include/ShoppingCart.h"
+#include "../include/Order.h"
 
 using namespace std;
 
-// Hàm hiển thị menu chính
-void showMenu() {
-    cout << "\n--- HE THONG QUAN LY BAN HANG ---" << endl;
+void hienThiMenu() {
+    cout << "\n========== HE THONG DAT HANG SMART ORDER ==========" << endl;
     cout << "1. Nhap thong tin khach hang" << endl;
-    cout << "2. Tai danh sach san pham tu file" << endl;
-    cout << "3. Xem danh sach san pham" << endl;
-    cout << "4. Them san pham vao gio hang" << endl;
-    cout << "5. Xem gio hang va cap nhat so luong" << endl;
-    cout << "6. Tien hanh thanh toan (Tao don hang)" << endl;
-    cout << "0. Thoat chuong trinh" << endl;
-    cout << "Chon chuc nang (0-6): ";
+    cout << "2. Tai danh sach san pham tu kho (File)" << endl;
+    cout << "3. Xem danh muc san pham" << endl;
+    cout << "4. Chon mua san pham (Them vao gio)" << endl;
+    cout << "5. Xem gio hang & Cap nhat so luong" << endl;
+    cout << "6. Thanh toan & Xuat hoa don" << endl;
+    cout << "0. Thoat" << endl;
+    cout << "---------------------------------------------------" << endl;
+    cout << "Lua chon cua ban: ";
 }
 
 int main() {
-    ProductManager pm;
-    Customer currentCustomer;
-    ShoppingCart currentCart;
-    bool isCustomerSet = false;
-    bool isProductLoaded = false;
+    srand(time(0)); // Khoi tao so ngau nhien cho Ma don hang
+    ProductManager khoHang;
+    Customer khachHang;
+    ShoppingCart gioHang;
+    
+    bool daCoKhachHang = false;
+    bool daTaiSanPham = false;
 
-    int choice;
+    int luaChon;
     do {
-        showMenu();
-        cin >> choice;
+        hienThiMenu();
+        if (!(cin >> luaChon)) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            continue;
+        }
 
-        switch (choice) {
+        switch (luaChon) {
             case 1: {
-                currentCustomer.input();
-                isCustomerSet = true;
-                cout << "=> Cap nhat thong tin khach hang thanh cong!" << endl;
+                cin.ignore();
+                khachHang.input();
+                daCoKhachHang = true;
+                cout << "=> Luu thong tin khach hang thanh cong!" << endl;
                 break;
             }
             case 2: {
-                // Gia su file du lieu la products.txt
-                pm.loadFromFile("products.txt");
-                isProductLoaded = true;
+                // Dam bao ban co file products.txt dung cau truc trong thu muc du an
+                khoHang.loadFromFile("products.txt");
+                daTaiSanPham = true;
+                cout << "=> Da tai du lieu tu kho hang." << endl;
                 break;
             }
             case 3: {
-                if (!isProductLoaded) {
-                    cout << "![Loi] Vui long tai danh sach san pham (Muc 2) truoc." << endl;
+                if (!daTaiSanPham) {
+                    cout << "[!] Vui long tai du lieu (Muc 2) truoc." << endl;
                 } else {
-                    pm.display();
+                    cout << "\n--- DANH MUC SAN PHAM ---" << endl;
+                    khoHang.display();
                 }
                 break;
             }
             case 4: {
-                if (!isProductLoaded) {
-                    cout << "![Loi] Chua co du lieu san pham." << endl;
+                if (!daTaiSanPham) {
+                    cout << "[!] Kho hang dang trong." << endl;
                     break;
                 }
                 string id;
-                int qty;
-                cout << "Nhap ma san pham (ID) muon mua: ";
+                int sl;
+                cout << "Nhap Ma san pham muon mua: ";
                 cin >> id;
-                Product* p = pm.findByID(id);
+                Product* p = khoHang.findByID(id);
                 if (p != nullptr) {
                     cout << "Nhap so luong: ";
-                    cin >> qty;
-                    // Tao CartItem tu thong tin Product tim duoc
-                    CartItem newItem(p->getID(), p->getName(), p->getPrice(), qty);
-                    currentCart.addItem(newItem);
-                    cout << "=> Da them vao gio hang." << endl;
+                    cin >> sl;
+                    CartItem item(p->getID(), p->getName(), p->getPrice(), sl);
+                    gioHang.addItem(item);
+                    cout << "=> Da them " << p->getName() << " vao gio." << endl;
                 } else {
-                    cout << "![Loi] Khong tim thay san pham voi ID: " << id << endl;
+                    cout << "[!] Khong tim thay ID: " << id << endl;
                 }
                 break;
             }
             case 5: {
-                currentCart.displayCart();
-                if (currentCart.getTotalPrice() > 0) {
-                    cout << "Ban co muon cap nhat so luong? (1: Co, 0: Khong): ";
-                    int subChoice; cin >> subChoice;
-                    if (subChoice == 1) {
-                        string id; int newQty;
+                cout << "\n--- GIO HANG HIEN TAI ---" << endl;
+                gioHang.displayCart();
+                if (gioHang.getTotalPrice() > 0) {
+                    cout << "Ban co muon sua so luong? (1: Co, 0: Khong): ";
+                    int x; cin >> x;
+                    if (x == 1) {
+                        string id; int sl_moi;
                         cout << "Nhap ID san pham: "; cin >> id;
-                        cout << "Nhap so luong moi: "; cin >> newQty;
-                        currentCart.updateQuantity(id, newQty);
+                        cout << "Nhap so luong moi: "; cin >> sl_moi;
+                        gioHang.updateQuantity(id, sl_moi);
+                        cout << "=> Da cap nhat." << endl;
                     }
                 }
                 break;
             }
             case 6: {
-                if (!isCustomerSet) {
-                    cout << "![Loi] Vui long nhap thong tin khach hang (Muc 1) truoc khi thanh toan." << endl;
+                if (!daCoKhachHang) {
+                    cout << "[!] Vui long nhap thong tin khach hang (Muc 1) truoc." << endl;
                     break;
                 }
-                if (currentCart.getTotalPrice() == 0) {
-                    cout << "![Loi] Gio hang trong. Hay mua sam truoc khi thanh toan!" << endl;
+                if (gioHang.getTotalPrice() == 0) {
+                    cout << "[!] Gio hang dang trong!" << endl;
                     break;
                 }
 
-                // Tao don hang voi ma don hang ngau nhien (Vi du: ORD123)
-                Order myOrder("ORD" + to_string(rand() % 1000), currentCustomer, currentCart);
+                // Tao don hang voi ID ngau nhien
+                string maDH = "ORD" + to_string(rand() % 9000 + 1000);
+                Order donHang(maDH, khachHang, gioHang);
                 
-                // Quy trinh thiet lap don hang
-                myOrder.inputDeliveryAddress();
-                myOrder.calculateShippingFee();
+                donHang.inputDeliveryAddress();
+                donHang.calculateShippingFee();
+                donHang.displayOrderSummary();
                 
-                // Ket qua cuoi cung
-                myOrder.displayOrderSummary();
-                
-                cout << "\nCam on ban da mua hang! Chuong trinh se lam moi gio hang." << endl;
-                currentCart = ShoppingCart(); // Reset gio hang sau khi thanh toan
+                cout << "\n=> Dat hang thanh cong! Gio hang se duoc lam moi." << endl;
+                gioHang = ShoppingCart(); // Reset gio hang
                 break;
             }
             case 0:
-                cout << "Dang thoat chuong trinh..." << endl;
+                cout << "Tam biet!" << endl;
                 break;
             default:
-                cout << "Lua chon khong hop le!" << endl;
+                cout << "Lua chon khong hop le." << endl;
         }
-    } while (choice != 0);
+    } while (luaChon != 0);
 
     return 0;
 }
