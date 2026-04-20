@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "../include/Order.h"
 #include <iomanip> // Để format tiền tệ
 
