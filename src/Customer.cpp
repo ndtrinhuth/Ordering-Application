@@ -1,5 +1,9 @@
 #include "../include/Customer.h"
+#include <string>
+#include <iostream>
+#include <string>
 
+using namespace std;
 // Constructor
 Customer::Customer()
 {
